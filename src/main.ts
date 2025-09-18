@@ -24,11 +24,11 @@ const createWindow = async () => {
       webSecurity: true,
       allowRunningInsecureContent: false,
       experimentalFeatures: false,
-      // devTools:false,
+      devTools:false,
       preload: path.join(__dirname, 'preload.js'), // ⚡ 生产环境路径正确
     },
   });
-  // Menu.setApplicationMenu(null)
+  Menu.setApplicationMenu(null)
   if (isDev) {
     // ✅ 开发环境：Vite Dev Server
     await mainWindow.loadURL('http://localhost:5173');

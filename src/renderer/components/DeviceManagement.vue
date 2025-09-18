@@ -383,7 +383,7 @@ const testDevice = () => {
     ElMessage.warning("请先选择设备");
     return;
   }
-  console.log(selectedDevices.value);
+  // console.log(selectedDevices.value);
   const params = selectedDevices.value.map((device: Device) => ({
     productId: device.productId,
     deviceName: device.deviceName,
@@ -422,8 +422,8 @@ const refreshDevices = async () => {
       ElMessage.error("获取设备列表失败");
     }
   } catch (error) {
-    console.error("获取设备列表出错:", error);
-    ElMessage.error("网络请求失败，请检查网络连接");
+    // console.error("获取设备列表出错:", error);
+    ElMessage.error("获取设备列表出错");
   } finally {
     loading.value = false;
   }
