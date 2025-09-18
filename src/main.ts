@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain,Menu  } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import started from 'electron-squirrel-startup';
@@ -24,10 +24,11 @@ const createWindow = async () => {
       webSecurity: true,
       allowRunningInsecureContent: false,
       experimentalFeatures: false,
+      // devTools:false,
       preload: path.join(__dirname, 'preload.js'), // ⚡ 生产环境路径正确
     },
   });
-
+  // Menu.setApplicationMenu(null)
   if (isDev) {
     // ✅ 开发环境：Vite Dev Server
     await mainWindow.loadURL('http://localhost:5173');
@@ -44,7 +45,7 @@ const createWindow = async () => {
         'data:text/html,<h1>Failed to load app</h1><p>Check console for details</p>'
       );
     }
-    mainWindow.webContents.openDevTools(); // 可选：生产环境也开 devtools
+    mainWindow.webContents.openDevTools(); 
   }
 };
 

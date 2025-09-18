@@ -38,12 +38,14 @@ onUnmounted(()=>{
 body {
   font-family: "Microsoft YaHei", "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 100vh;
   /* background-color: #000; */
-  max-height: 100vh;
+  /* max-height: 100vh; */
 }
 
 .device-management-app {
-  min-height: 100vh;
-  padding: 20px;
+  height: 100%;
+  /* min-height: 100vh; */
+  padding: 10px;
 }
 </style>

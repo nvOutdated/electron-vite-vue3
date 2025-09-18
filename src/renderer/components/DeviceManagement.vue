@@ -409,8 +409,8 @@ const refreshDevices = async () => {
     loading.value = true;
 
     const res = await queryOnlineDeviceList({});
-
-    if (res.code === 200) {
+    
+    if (res.code === 200&&res.data instanceof Array&&res.data.length>0) {
       // 为每个设备添加选中状态
       devices.value = res.data.map((device: Device) => ({
         ...device,
@@ -512,8 +512,9 @@ onMounted(() => {
 }
 
 .device-list {
-  max-height: calc(100vh - 300px);
-  overflow-y: none;
+  max-height: calc(100vh - 270px);
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .device-item {
