@@ -1,7 +1,8 @@
 <template>
   <el-config-provider :locale="zhCn">
     <div class="device-management-app">
-      <DeviceManagement />
+    <!--   <DeviceManagement /> -->
+       <DeviceManagementV2 />
        <!-- fuck -->
     <!--   <cat1Light/> -->
     </div>
@@ -12,6 +13,7 @@
 import { ElConfigProvider } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import DeviceManagement from './components/DeviceManagement.vue'
+import DeviceManagementV2 from './components/DeviceManagementV2.vue'
 import cat1Light from './components/cat1Light/index.vue'
 import { websocketManager } from './utils/websocket';
 import { onMounted,onUnmounted } from 'vue';

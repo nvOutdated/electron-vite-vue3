@@ -64,7 +64,11 @@ export function useWebSocket(relativeUrl: string) {
 
       try {
         const data = JSON.parse(event.data)
-        console.log('消息接收1', data)
+        // console.log('消息接收1', data)
+        if(data.dataType==2){
+          messageStore.addDevice(data)
+          
+        }
         messageStore.processMessage(data)
       } catch (e) {
         console.error('消息解析失败', e)

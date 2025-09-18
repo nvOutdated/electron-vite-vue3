@@ -9,6 +9,7 @@ export const useMessageStore = defineStore('message', {
   // 使用 null 作为初始状态
   state: (): any => ({
     broadcastDevice: null,
+    broadcastDeviceList: [],
   }),
 
   actions: {
@@ -20,10 +21,22 @@ export const useMessageStore = defineStore('message', {
       // 统一处理警告级别的消息以用于通知
       this.broadcastDevice = message
     },
+    addDevice(message: any) {
+     let findIndex = this.broadcastDeviceList.findIndex((item: any) => item.deviceName === message.deviceName)
+     if(findIndex==-1){
+      message.isOnline=false
+      this.broadcastDeviceList.unshift(message)
+     }else{
+      this.broadcastDeviceList[findIndex].isOnline=true
+     }
+    },
     clearMessage(){
       this.broadcastDevice = []
     },
-
+    clearMessageList(){
+      this.broadcastDeviceList = []
+    },
+     
     // --- 消息处理器 ---
 
     handleBroadcastMessage(message: any) {
@@ -35,5 +48,7 @@ export const useMessageStore = defineStore('message', {
   },
 
   getters: {
-  },
+    getBroadcastDevice: (state) => state.broadcastDevice,
+    getBroadcastDeviceList: (state) => state.broadcastDeviceList,
+    },
 })
