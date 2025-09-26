@@ -47,5 +47,22 @@ export const sendTurnOffDevice = (deviceList:deviceList[]) => {
         deviceList
     })
 }
+/* 
+发送A灯开关指令
+*/
+export const sendATurnOnDevice = (deviceList:deviceList[]) => {
+    return request.post(`${requestUrl}/onenetGateway/api/debug/sendTurnOnLightACommand`, {
+        deviceList
+    })
+}
+/* 
+发送B灯开关指令
+*/
+export const sendBTurnOnDevice = (deviceList:deviceList[]) => {
+    return request.post(`${requestUrl}/onenetGateway/api/debug/sendTurnOnLightBCommand`, {
+        deviceList
+    })
+}
+
 
 

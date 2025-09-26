@@ -157,7 +157,7 @@
               :icon="SwitchButton"
               @click="turnOn"
               :disabled="selectedDevices.length === 0"
-              size="large"
+              size="small"
               class="control-btn"
             >
               开灯
@@ -167,17 +167,37 @@
               :icon="Close"
               @click="turnOff"
               :disabled="selectedDevices.length === 0"
-              size="large"
+              size="small"
               class="control-btn"
             >
               关灯
+            </el-button>
+            <el-button
+              type="success"
+              :icon="Close"
+              @click="turnOnALight"
+              :disabled="selectedDevices.length === 0"
+              size="small"
+              class="control-btn"
+            >
+              A开B关
+            </el-button>
+            <el-button
+              type="success"
+              :icon="Close"
+              @click="turnOnBLight"
+              :disabled="selectedDevices.length === 0"
+              size="small"
+              class="control-btn"
+            >
+              B开A关
             </el-button>
             <el-button
               type="primary"
               :icon="Search"
               @click="testDevice"
               :disabled="selectedDevices.length === 0"
-              size="large"
+              size="small"
               class="control-btn"
             >
               检测
@@ -208,6 +228,8 @@ import {
   sendTestDevice,
   sendTurnOnDevice,
   sendTurnOffDevice,
+  sendATurnOnDevice,
+  sendBTurnOnDevice,
 } from "../apis/test";
 import { useMessageStore } from "../stores/websocketStore";
 interface Device {
@@ -355,6 +377,48 @@ const turnOff = () => {
     }
   });
 };
+const turnOnALight = ()=>{
+  if (selectedDevices.value.length === 0) {
+    ElMessage.warning("请先选择设备");
+    return;
+  }
+  const sendParams = selectedDevices.value.map((device: Device) => ({
+    productId: device.productId,
+    deviceName: device.deviceName,
+    deviceCode: device.deviceCode,
+    lastTime: device.lastTime,
+  }));
+  sendATurnOnDevice(sendParams).then((res) => {
+    console.log(res);
+    if (res.code === 200) {
+      ElMessage.success("A灯开灯成功");
+    } else {
+      ElMessage.error("A灯开灯失败");
+    }
+  });
+}
+
+const turnOnBLight = ()=>{
+  if (selectedDevices.value.length === 0) {
+    ElMessage.warning("请先选择设备");
+    return;
+  }
+  const sendParams = selectedDevices.value.map((device: Device) => ({
+    productId: device.productId,
+    deviceName: device.deviceName,
+    deviceCode: device.deviceCode,
+    lastTime: device.lastTime,
+  }));
+  sendBTurnOnDevice(sendParams).then((res) => {
+    console.log(res);
+    if (res.code === 200) {
+      ElMessage.success("B灯开灯成功");
+    } else {
+      ElMessage.error("B灯开灯失败");
+    }
+  });
+}
+
 
 const testDevice = () => {
   if (selectedDevices.value.length === 0) {
@@ -673,8 +737,8 @@ const refreshDevices = async () => {
 .control-btn {
   border-radius: 8px;
   font-weight: 600;
-  min-width: 120px;
-  height: 48px;
+  min-width: 90px;
+  height: 42px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
