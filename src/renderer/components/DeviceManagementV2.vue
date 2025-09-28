@@ -21,8 +21,49 @@
           >
             刷新
           </el-button>
+          
+          
         </div>
-        <div class="header-right">
+        <div class="device-id-filter">
+            <el-input
+              v-model="startDeviceId"
+              :disabled="!isEditingFilter"
+              placeholder="起始设备ID"
+              style="width: 120px; margin-right: 8px"
+              clearable
+              @clear="handleFilterClear"
+              @keyup.enter="confirmFilter"
+            />
+            <span class="filter-separator">-</span>
+            <el-input
+              v-model="endDeviceId"
+              :disabled="!isEditingFilter"
+              placeholder="结束设备ID"
+              style="width: 120px; margin: 0 8px"
+              clearable
+              @clear="handleFilterClear"
+              @keyup.enter="confirmFilter"
+            />
+            <el-button
+              v-if="isEditingFilter"
+              type="primary"
+              size="small"
+              @click="confirmFilter"
+              class="filter-confirm-btn"
+            >
+              确认
+            </el-button>
+            <el-button
+              v-else
+              type="info"
+              size="small"
+              @click="enableFilterEdit"
+              class="filter-edit-btn"
+            >
+              修改
+            </el-button>
+          </div>
+        <div class="header-right" style="display: flex;">
           <h3 class="section-title">数据返回区</h3>
           <el-button
             type="danger"
@@ -44,13 +85,13 @@
           <template #header>
             <div class="card-header">
               <el-icon><Monitor /></el-icon>
-              <span>设备列表 (共 {{ devices.length }} 台)</span>
+              <span>设备列表 (共 {{ filteredDevices.length }} 台)</span>
             </div>
           </template>
 
           <div class="device-list">
             <template
-              v-for="device in devices"
+              v-for="device in filteredDevices"
               :key="device.productId + device.deviceName"
             >
               <div
@@ -211,6 +252,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from "vue";
+import { ElMessage } from 'element-plus';
 import {
   Refresh,
   Delete,
@@ -222,7 +264,6 @@ import {
   Loading,
   ChatDotSquare,
 } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
 import {
   queryOnlineDeviceList,
   sendTestDevice,
@@ -290,6 +331,69 @@ const loading = ref(false);
 const selectedDevices = computed(() =>
   devices.value.filter((device) => device.selected)
 );
+
+// 过滤设备列表
+const filteredDevices = computed(() => {
+  if (!startDeviceId.value && !endDeviceId.value) return devices.value;
+  
+  return devices.value.filter(device => {
+    const deviceNum = parseInt(device.deviceCode);
+    if (isNaN(deviceNum)) return false;
+    
+    if (startDeviceId.value && endDeviceId.value) {
+      return deviceNum >= parseInt(startDeviceId.value) && deviceNum <= parseInt(endDeviceId.value);
+    } else if (startDeviceId.value) {
+      return deviceNum >= parseInt(startDeviceId.value);
+    } else if (endDeviceId.value) {
+      return deviceNum <= parseInt(endDeviceId.value);
+    }
+    return true;
+  });
+});
+
+// 设备ID范围过滤
+const startDeviceId = ref('');
+const endDeviceId = ref('');
+const isEditingFilter = ref(true);
+const tempStartId = ref('');
+const tempEndId = ref('');
+
+// 启用筛选器编辑
+const enableFilterEdit = () => {
+  isEditingFilter.value = true;
+  // 保存当前值到临时变量
+  tempStartId.value = startDeviceId.value;
+  tempEndId.value = endDeviceId.value;
+};
+
+// 确认筛选条件
+const confirmFilter = () => {
+  // 验证输入
+  if (startDeviceId.value && isNaN(parseInt(startDeviceId.value))) {
+    ElMessage.warning('起始设备ID必须是数字');
+    return;
+  }
+  if (endDeviceId.value && isNaN(parseInt(endDeviceId.value))) {
+    ElMessage.warning('结束设备ID必须是数字');
+    return;
+  }
+  if (startDeviceId.value && endDeviceId.value && parseInt(startDeviceId.value) > parseInt(endDeviceId.value)) {
+    ElMessage.warning('起始ID不能大于结束ID');
+    return;
+  }
+  
+  isEditingFilter.value = false;
+  ElMessage.success('筛选条件已应用');
+};
+
+// 处理清除筛选条件
+const handleFilterClear = () => {
+  startDeviceId.value = '';
+  endDeviceId.value = '';
+  // 清除筛选后自动确认
+  isEditingFilter.value = false;
+};
+
 const selectAll = computed({
   get: () =>
     devices.value.length > 0 &&
@@ -320,13 +424,52 @@ const handleSelectAll = () => {
   // 移除全选时的日志显示
 };
 
-const updateDataDisplay = (message: string) => {
-  dataLogs.value.unshift(message);
+const updateDataDisplay = (message: any) => {
+  try {
+    console.log(message,"message");
+    const data = message
+    if (data.deviceCode) {
+      // 检查设备ID是否在筛选范围内
+      if (!isDeviceInRange(data.deviceCode)) {
+        console.log(`设备 ${data.deviceCode} 不在筛选范围内，已过滤`);
+        return;
+      }
+      // // 查找是否已存在该设备的数据
+      // const existingIndex = dataLogs.value.findIndex(
+      //   (item) => item.deviceName === data.deviceName
+      // );
+      
+      // if (existingIndex !== -1) {
+      //   // 更新现有设备数据
+      //   dataLogs.value[existingIndex] = {
+      //     ...dataLogs.value[existingIndex],
+      //     data: { ...dataLogs.value[existingIndex].data, ...data },
+      //   };
+      // } else {
+      //   // 添加新设备数据
+      //   dataLogs.value.unshift({
+      //     deviceName: data.deviceName,
+      //     deviceCode: data.deviceCode,
+      //     productId: data.productId,
+      //     data: { ...data },
+      //   });
+      // }
+    }
+    dataLogs.value.unshift({
+        deviceName: data.deviceName,
+        deviceCode: data.deviceCode,
+        productId: data.productId,
+        data: { ...data },
+      });
+  } catch (error) {
+    console.error("更新数据显示失败", error);
+  }
 
   // 限制日志数量，避免内存过多占用
   if (dataLogs.value.length > 100) {
     dataLogs.value = dataLogs.value.slice(0, 100);
   }
+  
 
   // 自动滚动到顶部
   nextTick(() => {
@@ -448,6 +591,18 @@ const clearData = () => {
 const refreshDevices = async () => {
   messageStore.clearMessageList();
 };
+
+const isDeviceInRange = (deviceName: string) => {
+  if (!startDeviceId.value && !endDeviceId.value) return true;
+  
+  const deviceNum = parseInt(deviceName);
+  const startNum = startDeviceId.value ? parseInt(startDeviceId.value) : -Infinity;
+  const endNum = endDeviceId.value ? parseInt(endDeviceId.value) : Infinity;
+  
+  if (isNaN(deviceNum)) return false;
+  
+  return deviceNum >= startNum && deviceNum <= endNum;
+};
 </script>
 
 <style scoped>
@@ -462,8 +617,9 @@ const refreshDevices = async () => {
   margin: 0 auto;
 }
 .device-data-card {
-  /* color: #0277bd; */
-  /* border-bottom: 1px solid #e2e8f0; */
+  color: #334155;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 8px 0;
 }
 .device-header{
   background-color: #cae3fd;
@@ -483,15 +639,53 @@ const refreshDevices = async () => {
 }
 
 .header-left {
-  display: flex;
-  align-items: center;
   gap: 5px;
 }
 
-.header-right {
+.device-id-filter {
   display: flex;
   align-items: center;
-  gap: 5px;
+  margin-left: 24px;
+  
+  .filter-separator {
+    margin: 0 8px;
+    color: #606266;
+    font-weight: 500;
+  }
+  
+  .el-input {
+    width: 120px;
+    
+    &.is-disabled .el-input__wrapper {
+      background-color: #f5f7fa;
+      box-shadow: 0 0 0 1px #dcdfe6 inset;
+    }
+  }
+  
+  .el-button {
+    margin-left: 8px;
+  }
+  
+  .filter-confirm-btn {
+    background-color: #409eff;
+    border-color: #409eff;
+    
+    &:hover {
+      background-color: #66b1ff;
+      border-color: #66b1ff;
+    }
+  }
+  
+  .filter-edit-btn {
+    background-color: #909399;
+    border-color: #909399;
+    color: #fff;
+    
+    &:hover {
+      background-color: #a6a9ad;
+      border-color: #a6a9ad;
+    }
+  }
 }
 
 .section-title {
